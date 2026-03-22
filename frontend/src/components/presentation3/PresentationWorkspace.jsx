@@ -122,6 +122,7 @@ const PresentationWorkspace = ({ initialData, layout: propLayout }) => {
       <TopProgressBar />
       <AILoaderOverlay />
       <Notifications />
+       <DndProvider backend={HTML5Backend}>
       <div style={styles.root} className="presentation-workspace-root">
         <TopBar
           onPresent={() => setIsPresenting(true)}
@@ -142,6 +143,7 @@ const PresentationWorkspace = ({ initialData, layout: propLayout }) => {
           />
         </div>
       </div>
+    </DndProvider>
     </>
   );
 };
