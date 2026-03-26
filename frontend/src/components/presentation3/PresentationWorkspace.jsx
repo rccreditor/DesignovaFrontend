@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 
 import SlidesPanel from "./components/SlidesPanel/SlidesPanel";
 import PropertiesPanel from "./components/PropertiesPanel/PropertiesPanel";
@@ -124,7 +122,6 @@ const PresentationWorkspace = ({ initialData, layout: propLayout }) => {
       <TopProgressBar />
       <AILoaderOverlay />
       <Notifications />
-       <DndProvider backend={HTML5Backend}>
       <div style={styles.root} className="presentation-workspace-root">
         <TopBar
           onPresent={() => setIsPresenting(true)}
@@ -145,7 +142,6 @@ const PresentationWorkspace = ({ initialData, layout: propLayout }) => {
           />
         </div>
       </div>
-    </DndProvider>
     </>
   );
 };

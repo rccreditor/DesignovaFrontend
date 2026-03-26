@@ -559,6 +559,27 @@ class ApiService {
       body: JSON.stringify({ userId, serviceId, base64Image }),
     });
   }
+
+  // ============= Logo generation =============
+  async generateLogo(prompt, style = "realistic") {
+    return this.request(
+      `/api/generate-logo?style=${encodeURIComponent(style)}`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ prompt }),
+      }
+    );
+  }
+
+  // ============= PAYMENT API =============
+async createPayment(planName) {
+  return this.request(`/api/payment/create-payment/${planName}`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+}
+  
 }
 
 export default new ApiService();

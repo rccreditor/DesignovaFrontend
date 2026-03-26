@@ -6,7 +6,6 @@ id:1,
 title:"Instagram Post",
 img:"https://images.unsplash.com/photo-1542744173-8e7e53415bb0"
 },
-
 {
 id:2,
 title:"YouTube Thumbnail",
@@ -28,7 +27,7 @@ export default function ImageTemplates(){
 
 return(
 
-<div className="max-w-7xl mx-auto px-6 py-10">
+<div className="max-w-7xl mx-auto px-16 py-28">
 
 <h1 className="text-3xl font-bold mb-8">
 Image Templates
