@@ -54,7 +54,7 @@ import LandingPage from "./pages/LandingPage";
 import EditorTabPage from './pages/EditorTabPage';
 import ForgetPassword from "./pages/ForgetPassword";
 import PresentationWorkspace from "./components/presentation3/PresentationWorkspace";
-import PresentationTemplates from "./pages/presentationTemplates";
+import PresentationTemplates from "./pages/PresentationTemplates";
 import DocumentTemplates from "./pages/documentTemplates";
 import ImageTemplates from "./pages/imageTemplates";
 import ImageLayout from "./components/canva/ImageLayout/ImageLayout";
@@ -190,4 +190,3 @@ function App() {
 }
 
 export default App;
-
