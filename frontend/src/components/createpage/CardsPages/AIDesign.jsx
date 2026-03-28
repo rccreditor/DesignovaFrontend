@@ -17,13 +17,15 @@ export const AIDesign = () => {
   const [progress, setProgress] = useState(0);
   const [showBalancePopup, setShowBalancePopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [downloadFormat, setDownloadFormat] = useState("png");
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const styles = [
-    { name: "Realistic", img: "https://i.pinimg.com/736x/19/b2/74/19b274d1f2cf1c2fc90a111c1093eb94.jpg" },
-    { name: "Anime", img: "https://i.pinimg.com/736x/58/19/d2/5819d2ed10ee0f8142341f08aa928cd3.jpg" },
-    { name: "Cartoon", img: "https://i.pinimg.com/736x/42/62/67/426267b169ac8c49155ee9abc071ae3e.jpg" },
-    { name: "Sketch", img: "https://i.pinimg.com/avif/736x/89/5c/93/895c931f7182dbc68efa4ee87254fc81.avf" },
-    { name: "Painting", img: "https://i.pinimg.com/1200x/e4/47/93/e44793bcfda653dd605c105308cf3a1a.jpg" },
+    { name: "Realistic", img: "https://i.pinimg.com/736x/5c/b9/62/5cb9627a8d35ff42a96510c58fd68cd2.jpg" },
+    { name: "Anime", img: "https://i.pinimg.com/736x/92/bf/03/92bf03bfcd83247fab3b468fe560cfc7.jpg" },
+    { name: "Cartoon", img: "https://i.pinimg.com/736x/69/a2/7e/69a27e12ec3e857c925abb47590dd928.jpg" },
+    { name: "Sketch", img: "https://i.pinimg.com/736x/98/18/3a/98183a4a3b3e8ea0dec2ff3fb3c33317.jpg" },
+    { name: "Painting", img: "https://i.pinimg.com/736x/ee/3d/9b/ee3d9bbd7bcba1287c2ba4f995423e8c.jpg" },
   ];
 
 
@@ -60,7 +62,7 @@ export const AIDesign = () => {
 
       const style = selectedStyle.toLowerCase();
       const res = await api.generateLogo(prompt, style);
-      
+
       console.log(res);
 
       const images = res?.data?.[0];
@@ -109,6 +111,61 @@ export const AIDesign = () => {
 
   const openEditor = () => {
     navigate("/edito", { state: { image: activePreview } });
+  };
+
+  const handleDownload = async (imgUrl) => {
+    try {
+      setIsDownloading(true);
+
+      if (downloadFormat === 'svg') {
+        // Fetch image as blob, embed as base64 inside SVG
+        const imgRes = await fetch(imgUrl);
+        const imgBlob = await imgRes.blob();
+        const base64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(imgBlob);
+        });
+        const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024"><image href="${base64}" width="1024" height="1024" preserveAspectRatio="xMidYMid meet"/></svg>`;
+        const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ai-image.svg`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      if (downloadFormat === 'pdf') {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(
+          `<html><head><title>AI Image</title><style>` +
+          `*{margin:0;padding:0;box-sizing:border-box}` +
+          `body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}` +
+          `img{max-width:100%;height:auto}` +
+          `@media print{body{margin:0}}</style></head>` +
+          `<body><img src="${imgUrl}" onload="window.print();window.close();"/></body></html>`
+        );
+        printWindow.document.close();
+        return;
+      }
+
+      // jpg / png / webp — backend converts and returns binary blob
+      const blob = await api.exportS3Image(imgUrl, downloadFormat);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ai-image.${downloadFormat}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download failed:', err);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
 
@@ -211,19 +268,11 @@ export const AIDesign = () => {
               </>
             )}
 
-            {isLoading && (
-              <div className="w-full max-w-[360px] text-center">
-                <div className="h-2 bg-blue-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-yellow-400 transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-blue-900 font-semibold text-sm">
-                  {Math.floor(progress)}% Generating images
-                </p>
-              </div>
-            )}
+           {isLoading && (
+  <div className="flex flex-col items-center justify-center gap-4">
+    <div className="w-16 h-16 rounded-full border-4 border-transparent border-t-blue-700 border-r-yellow-400 animate-spin"></div>
+  </div>
+)}
 
             {generatedImages.length > 0 && (
               <>
@@ -304,15 +353,44 @@ export const AIDesign = () => {
             <div className="text-center">
               <img
                 src={activePreview}
-                className="max-h-[75vh] sm:max-h-[85vh] max-w-[92vw] rounded-xl"
+                className="max-h-[65vh] sm:max-h-[75vh] max-w-[92vw] rounded-xl"
                 alt=""
               />
-              <div className="flex gap-6 justify-center mt-6">
+
+              {/* Format selector */}
+              <div className="flex gap-2 justify-center mt-4 flex-wrap">
+                {['png', 'jpg', 'webp', 'svg', 'pdf'].map((fmt) => (
+                  <button
+                    key={fmt}
+                    onClick={() => setDownloadFormat(fmt)}
+                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide transition ${
+                      downloadFormat === fmt
+                        ? 'bg-yellow-400 text-blue-900'
+                        : 'bg-white/20 text-white hover:bg-white/30'
+                    }`}
+                  >
+                    {fmt}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex gap-4 justify-center mt-3 items-center">
                 <button
-                  onClick={openEditor}
-                  className="bg-blue-800 text-white px-6 py-2 rounded-lg"
+                  onClick={() => handleDownload(activePreview)}
+                  disabled={isDownloading}
+                  title={`Download as ${downloadFormat.toUpperCase()}`}
+                  className="flex items-center gap-2 bg-blue-800 hover:bg-blue-900 disabled:opacity-50 text-white px-5 py-2 rounded-lg transition"
                 >
-                  Open In Editor
+                  {isDownloading ? (
+                    <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  )}
+                  Download {isDownloading ? '...' : downloadFormat.toUpperCase()}
                 </button>
               </div>
             </div>
