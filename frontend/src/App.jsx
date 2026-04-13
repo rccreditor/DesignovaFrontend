@@ -50,7 +50,7 @@ import LandingPage from "./pages/LandingPage";
 import EditorTabPage from './pages/EditorTabPage';
 import ForgetPassword from "./pages/ForgetPassword";
 import PresentationWorkspace from "./components/presentation3/PresentationWorkspace";
-import DocumentTemplates from "./pages/documentTemplates";
+import DocumentTemplates from "./pages/DocumentTemplates";
 import ImageLayout from "./components/canva/ImageLayout/ImageLayout";
 import Pricing from "./components/analatics/Pricing";
 import ImageTemplates from "./pages/imageTemplates";
