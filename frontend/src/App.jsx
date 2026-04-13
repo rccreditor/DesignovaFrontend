@@ -53,7 +53,7 @@ import PresentationWorkspace from "./components/presentation3/PresentationWorksp
 import DocumentTemplates from "./pages/DocumentTemplates";
 import ImageLayout from "./components/canva/ImageLayout/ImageLayout";
 import Pricing from "./components/analatics/Pricing";
-import ImageTemplates from "./pages/imageTemplates";
+import ImageTemplates from "./pages/ImageTemplates";
 import PresentationTemplates from "./pages/presentationTemplates";
 
 const AppContent = () => {
